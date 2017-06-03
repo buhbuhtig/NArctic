@@ -141,7 +141,13 @@ namespace NArctic
 					segcount++;
 				}
 			}
-            var metadata = version.GetValue("metadata", new BsonDocument()).AsBsonDocument;
+
+		    var metadataRaw = version.GetValue("metadata", new BsonDocument()); // Added by VovaM, handling accurately "null" value from legacy Arctic 
+            var metadata = (metadataRaw == null || metadataRaw == BsonNull.Value)
+		        ? new BsonDocument()
+		        : metadataRaw.AsBsonDocument;
+
+
             if (segcount == 0)
             {
                 //var df1 = new DataFrame();
@@ -200,7 +206,7 @@ namespace NArctic
 
             if(chunksize>0 && df.Rows.Count>chunksize)
             {
-                var rng = Range.R(0, chunksize);
+                var rng = Range.R(0, chunksize - 1); // was Range.R(0, chunksize), looked like bug ('last' is not 'count')
                 BsonDocument ver = null;
 				int chunkscount = 0;
                 while (rng.First<df.Rows.Count) {
@@ -261,7 +267,7 @@ namespace NArctic
                         long date = seg_ind_buf.Read<long>(seg_ind_buf.Length - 16);
                         DateTime dt = DateTime64.ToDateTime(date);
                         var range = df.Index.AsDateTime().RangeOf(dt, 0, df.FilledCount-1, Location.GT);
-                        if (range.Last <= range.First)
+                        if (range.First > range.Last) // was (range.Last <= range.First), looked like a bug, range.Last == range.First is normal (count=1)
                         {
                             Log.Information($"Skipped DataFrame.Append because date {dt} already written for {symbol}");
                             return null; // Hey all was skipped
@@ -270,6 +276,11 @@ namespace NArctic
                         {
                             Log.Information($"Skipped DataFrame.Append initial {range.First} elements date {dt} already written for {symbol}");
                         }
+                        else if (!range.Initialized)                                                                            //vovam added for better handling
+                        {                                                                                                      //vovam added
+                            Log.Information($"Vovam:Skipped DataFrame.Append because date {dt} already written for {symbol}"); //vovam added
+                            return null; //vovam added
+                        }                                                                                                       //vovam added
                         df = df[range];
                     }
                 }

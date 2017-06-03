@@ -543,7 +543,8 @@ namespace NArctic
         public long BinarySearch(T item, IComparer<T> comparer, int startIndex=0, int endIndex=-1, Location match=Location.EQ)
         {
             var first = 0L;
-            var last = endIndex<0 ? Values.Count() + endIndex : endIndex-1;
+            // var last = endIndex<0 ? Values.Count() + endIndex : endIndex-1; //before vovam
+            var last = endIndex < 0 ? Values.Count() + endIndex : endIndex; // count and last were mixed up?
             // we treat first<=item<=last
             while (last >= first)
             {

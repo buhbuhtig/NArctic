@@ -555,7 +555,8 @@ namespace NArctic
             if (this.Index == null)
                 throw new InvalidOperationException("Please specify index");
             var s = this.Index.As<T>();
-            var range =  s.RangeOf(key, startIndex, endIndex<0 ? this.FilledCount+endIndex+1:endIndex, match);
+            //var range =  s.RangeOf(key, startIndex, endIndex<0 ? this.FilledCount+endIndex+1:endIndex, match); // before 
+            var range = s.RangeOf(key, startIndex, endIndex < 0 ? this.FilledCount + endIndex : endIndex, match); // count and last mixed up ?
             return this[range];
         }
 

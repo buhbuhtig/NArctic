@@ -266,7 +266,8 @@ namespace NumCIL.Generic
                 else if (range.SingleElement)
                     last = first;
                 else
-                    last = range.Last <= 0 ? (this.Shape.Dimensions[dim].Length - 1) + range.Last : range.Last - 1;
+                    //  last = range.Last <= 0 ? (this.Shape.Dimensions[dim].Length - 1) + range.Last : range.Last - 1; //before vovam
+                    last = range.Last < 0 ? this.Shape.Dimensions[dim].Length + range.Last : range.Last; // count and last were mixed up?
 
                 stride = range.Stride;
             }
